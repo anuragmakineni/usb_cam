@@ -1,7 +1,7 @@
 usb_cam [![Build Status](https://api.travis-ci.org/bosch-ros-pkg/usb_cam.png)](https://travis-ci.org/bosch-ros-pkg/usb_cam)
 =======
 
-#### A ROS Driver for V4L USB Cameras
+#### A ROS Driver for V4L USB Cameras (modified to use control flags for a PS3 Eye Camera)
 This package is based off of V4L devices specifically instead of just UVC.
 
 For full documentation, see [the ROS wiki](http://ros.org/wiki/usb_cam).
