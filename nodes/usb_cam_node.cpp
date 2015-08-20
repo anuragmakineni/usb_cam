@@ -70,26 +70,26 @@ public:
 
     // grab the parameters
     node_.param("video_device", video_device_name_, std::string("/dev/video0"));
-    node_.param("brightness", brightness_, -1); //0-255, -1 "leave alone"
-    node_.param("contrast", contrast_, -1); //0-255, -1 "leave alone"
-    node_.param("saturation", saturation_, -1); //0-255, -1 "leave alone"
-    node_.param("sharpness", sharpness_, -1); //0-255, -1 "leave alone"
+    node_.param("brightness", brightness_, 0); //0-255, -1 "leave alone"
+    node_.param("contrast", contrast_, 32); //0-255, -1 "leave alone"
+    node_.param("saturation", saturation_, 64); //0-255, -1 "leave alone"
+    node_.param("sharpness", sharpness_, 0); //0-255, -1 "leave alone"
     // possible values: mmap, read, userptr
     node_.param("io_method", io_method_name_, std::string("mmap"));
     node_.param("image_width", image_width_, 640);
     node_.param("image_height", image_height_, 480);
-    node_.param("framerate", framerate_, 30);
+    node_.param("framerate", framerate_, 60);
     // possible values: yuyv, uyvy, mjpeg, yuvmono10, rgb24
     node_.param("pixel_format", pixel_format_name_, std::string("mjpeg"));
     // enable/disable autofocus
     node_.param("autofocus", autofocus_, false);
     node_.param("focus", focus_, -1); //0-255, -1 "leave alone"
     // enable/disable autoexposure
-    node_.param("autoexposure", autoexposure_, true);
-    node_.param("exposure", exposure_, 100);
-    node_.param("gain", gain_, -1); //0-100?, -1 "leave alone"
+    node_.param("autoexposure", autoexposure_, false);
+    node_.param("exposure", exposure_, 137);
+    node_.param("gain", gain_, 255); //0-100?, -1 "leave alone"
     // enable/disable auto white balance temperature
-    node_.param("auto_white_balance", auto_white_balance_, true);
+    node_.param("auto_white_balance", auto_white_balance_, false);
     node_.param("white_balance", white_balance_, 4000);
 
     // load the camera info
@@ -134,6 +134,8 @@ public:
     cam_.start(video_device_name_.c_str(), io_method, pixel_format, image_width_,
 		     image_height_, framerate_);
 
+//     cam_.set_v4l_parameter("gain_automatic",0);
+
     // set camera parameters
     if (brightness_ >= 0)
     {
@@ -157,43 +159,29 @@ public:
 
     if (gain_ >= 0)
     {
+      cam_.set_v4l_parameter("gain_automatic",0);
       cam_.set_v4l_parameter("gain", gain_);
     }
 
     // check auto white balance
     if (auto_white_balance_)
     {
-      cam_.set_v4l_parameter("white_balance_temperature_auto", 1);
+      cam_.set_v4l_parameter("white_balance_automatic", 1);
     }
     else
     {
-      cam_.set_v4l_parameter("white_balance_temperature_auto", 0);
-      cam_.set_v4l_parameter("white_balance_temperature", white_balance_);
+      cam_.set_v4l_parameter("white_balance_automatic", 0);
     }
 
     // check auto exposure
     if (!autoexposure_)
     {
       // turn down exposure control (from max of 3)
-      cam_.set_v4l_parameter("exposure_auto", 1);
+      cam_.set_v4l_parameter("auto_exposure", 0);
       // change the exposure level
-      cam_.set_v4l_parameter("exposure_absolute", exposure_);
+//      cam_.set_v4l_parameter("exposure", exposure_);
     }
 
-    // check auto focus
-    if (autofocus_)
-    {
-      cam_.set_auto_focus(1);
-      cam_.set_v4l_parameter("focus_auto", 1);
-    }
-    else
-    {
-      cam_.set_v4l_parameter("focus_auto", 0);
-      if (focus_ >= 0)
-      {
-        cam_.set_v4l_parameter("focus_absolute", focus_);
-      }
-    }
   }
 
   virtual ~UsbCamNode()
